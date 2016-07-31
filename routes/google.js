@@ -33,6 +33,10 @@ var request = require('request');
 var _ = require('underscore');
 var base64 = require('base-64')
 var emailAddresses = require('email-addresses')
+
+var githubAPI = require('../app_modules/github')
+var githubSender = require('../senders/github')
+
 var errorHandler = require('../app_modules/error');
 
 router.get('/authorize',function(req,res,next){
@@ -293,7 +297,9 @@ function processInboxMessage(user,message,callback){
 			var fromEmail = emailAddresses.parseOneAddress(fromHeader.value).address
 console.log('email is from %s',fromEmail)			
 			if(fromEmail == 'notifications@github.com'){
-				// TBD process github message
+				githubSender.process(user.github.accerss_token,message.payload.parts[0],function(err,data){
+					callback(err,data)
+				})
 			}else{
 				callback(null,message)
 			}
