@@ -118,57 +118,8 @@ console.log('profile is %s',util.inspect(watch))
  				}
  			});
  		},
- 		// create the folders
- 		function(accessToken,profile,watch,callback){
- 			var headers = {
- 				Authorization: 'Bearer ' + accessToken,
- 				'Content-type': 'application/json'
- 			}
- 			var form = {
- 				name: 'DPI Important'
- 			}
- 			request.post('https://www.googleapis.com/gmail/v1/users/' + profile.id + '/labels',{headers: headers, body: JSON.stringify(form)},function(error,response,body){
- 				if(error){
- 					callback(error);
- 				}else if(response.statusCode == 409){
- 					// this means label already exists
- 					callback(null,accessToken,profile,watch,null);
- 				}else if(response.statusCode > 300){
- 					console.log(response.statusCode + ' : ' + body)
- 					callback(response.statusCode + ' : ' + body);
- 				}else{
- 					var dpiImportantLabel = JSON.parse(body);
-console.log('dpiImportantLabel is %s',util.inspect(dpiImportantLabel))
- 					callback(null,accessToken,profile,watch,dpiImportantLabel);
- 				}
- 			});
- 		},
- 		function(accessToken,profile,watch,dpiImportantLabel,callback){
- 			var headers = {
- 				Authorization: 'Bearer ' + accessToken,
- 				'Content-type': 'application/json'
- 			}
- 			var form = {
- 				name: 'DPI Not Important'
- 			}
- 			request.post('https://www.googleapis.com/gmail/v1/users/' + profile.id + '/labels',{headers: headers, body: JSON.stringify(form)},function(error,response,body){
- 				if(error){
- 					callback(error);
- 				}else if(response.statusCode == 409){
- 					// this means label already exists
- 					callback(null,accessToken,profile,watch,dpiImportantLabel,null);
- 				}else if(response.statusCode > 300){
- 					console.log(response.statusCode + ' : ' + body)
- 					callback(response.statusCode + ' : ' + body);
- 				}else{
- 					var dpiNotImportantLabel = JSON.parse(body);
-console.log('dpiNotImportantLabel is %s',util.inspect(dpiNotImportantLabel))
- 					callback(null,accessToken,profile,watch,dpiImportantLabel,dpiNotImportantLabel);
- 				}
- 			});
- 		},
  		// insert/update the user record to db
- 		function(accessToken,profile,watch,dpiImportantLabel,dpiNotImportantLabel,callback){
+ 		function(accessToken,profile,watch,callback){
  			var users = req.db.get('users');
  			var email = profile.emails[0].value;
  			var google = {
@@ -180,22 +131,12 @@ console.log('dpiNotImportantLabel is %s',util.inspect(dpiNotImportantLabel))
  				watch: watch
  			}
  			
- 			if(dpiImportantLabel){
- 				google.labels = {};
- 				google.labels.important = dpiImportantLabel
- 			}
- 			if(dpiNotImportantLabel){
- 				google.labels.not_important = dpiNotImportantLabel
- 			}
-console.log('google is %s',util.inspect(google)) 			
  			var updateSet = {
 				$setOnInsert: {
 					email: email,
 					created_at: new Date(),
+					google: google
 	 			},
- 				$set: {
- 					google: google, 
- 				}	
  			}
  			
  			
@@ -209,6 +150,85 @@ console.log('google is %s',util.inspect(google))
  				callback(err,user)
  			});
  		},
+ 		function(user,callback){
+ 			if('labels' in user.google){
+ 				callback(null,user)
+ 			}else{
+				async.parallel([
+	 		 		// create the folders
+	 		 		function(callback){
+	 		 			var headers = {
+	 		 				Authorization: 'Bearer ' + user.google.access_token,
+	 		 				'Content-type': 'application/json'
+	 		 			}
+	 		 			var form = {
+	 		 				name: 'DPI Important'
+	 		 			}
+	 		 			request.post('https://www.googleapis.com/gmail/v1/users/' + user.google.id + '/labels',{headers: headers, body: JSON.stringify(form)},function(error,response,body){
+	 		 				if(error){
+	 		 					callback(error);
+	 		 				}else if(response.statusCode == 409){
+	 		 					// this means label already exists
+	 		 					callback(null,accessToken,profile,watch,null);
+	 		 				}else if(response.statusCode > 300){
+	 		 					console.log(response.statusCode + ' : ' + body)
+	 		 					callback(response.statusCode + ' : ' + body);
+	 		 				}else{
+	 		 					var dpiImportantLabel = JSON.parse(body);
+	 		console.log('dpiImportantLabel is %s',util.inspect(dpiImportantLabel))
+	 		 					callback(null,dpiImportantLabel);
+	 		 				}
+	 		 			});
+	 		 		},
+	 		 		function(callback){
+	 		 			var headers = {
+	 		 				Authorization: 'Bearer ' + user.google.access_token,
+	 		 				'Content-type': 'application/json'
+	 		 			}
+	 		 			var form = {
+	 		 				name: 'DPI Not Important'
+	 		 			}
+	 		 			request.post('https://www.googleapis.com/gmail/v1/users/' + user.google.id + '/labels',{headers: headers, body: JSON.stringify(form)},function(error,response,body){
+	 		 				if(error){
+	 		 					callback(error);
+	 		 				}else if(response.statusCode == 409){
+	 		 					// this means label already exists
+	 		 					callback(null,accessToken,profile,watch,dpiImportantLabel,null);
+	 		 				}else if(response.statusCode > 300){
+	 		 					console.log(response.statusCode + ' : ' + body)
+	 		 					callback(response.statusCode + ' : ' + body);
+	 		 				}else{
+	 		 					var dpiNotImportantLabel = JSON.parse(body);
+	 		console.log('dpiNotImportantLabel is %s',util.inspect(dpiNotImportantLabel))
+	 		 					callback(null,dpiNotImportantLabel);
+	 		 				}
+	 		 			});
+	 		 		},
+				 				                 
+				],function(err,results){
+ 					if(err){
+ 						callback(err)
+ 					}else{
+ 						var users = req.db.get('users');
+ 						users.findAndModify({
+ 							_id: user._id.toString()
+ 						},{
+ 							$set:{
+ 								'google.labels' : {
+ 									important: results[0],
+ 									not_importanr: results[1]
+ 								}
+ 							}
+ 						},{
+ 							new: true
+ 						},function(err,user){
+ 							callback(err,user)
+ 						})
+ 					}
+ 				})
+ 				
+ 			}
+ 		}
  		
  	],function(err,user){
  		if(err){
