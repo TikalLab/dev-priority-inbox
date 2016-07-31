@@ -92,15 +92,18 @@ console.log('profile is %s',util.inspect(profile))
  		// add a watch to their gmail to send push to our app 
  		function(accessToken,profile,callback){
  			var headers = {
- 				Authorization: 'Bearer ' + accessToken	
+ 				Authorization: 'Bearer ' + accessToken,
+ 				'Content-type': 'application/json'
  			}
  			var form = {
  				topicName: config.get('google.topic')
  			}
- 			request('https://www.googleapis.com/gmail/v1/users/' + profile.id + '/watch',{headers: headers, body: JSON.stringify(form)},function(error,response,body){
+ 			request.post('https://www.googleapis.com/gmail/v1/users/' + profile.id + '/watch',{headers: headers, body: JSON.stringify(form)},function(error,response,body){
  				if(error){
  					callback(error);
  				}else if(response.statusCode > 300){
+ 					console.log(response.statusCode + ' : ' + body)
+ 					
  					callback(response.statusCode + ' : ' + body);
  				}else{
  					var watch = JSON.parse(body);
@@ -158,5 +161,10 @@ console.log('profile is %s',util.inspect(watch))
  	});
 })
 
+router.post('/push',function(req,res,next){
+	console.log('body is %s',util.inspect(req.body));
+	res.sendStatus(200)
+	
+})
 
 module.exports = router;
