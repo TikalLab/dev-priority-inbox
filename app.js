@@ -14,14 +14,14 @@ var MongoStore = require('connect-mongo')(session);
 //mongo
 var mongo = require('mongodb');
 var monk = require('monk');
-var mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/dotedu';
+var mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/dpi';
 var db = monk(mongoUri);
 
-var index = require('./routes/index');
-var users = require('./routes/users');
-var admin = require('./routes/admin');
+//var index = require('./routes/index');
+//var users = require('./routes/users');
+//var admin = require('./routes/admin');
 var google = require('./routes/google');
-var github = require('./routes/github');
+//var github = require('./routes/github');
 //var admin = require('./routes/admin');
 
 var app = express();
@@ -62,11 +62,11 @@ app.use(function(req,res,next){
 });
 
 
-app.use('/', index);
-app.use('/', users);
+//app.use('/', index);
+//app.use('/', users);
 //app.use('/admin', admin);
 app.use('/google', google);
-app.use('/github', github);
+//app.use('/github', github);
 
 
 // catch 404 and forward to error handler

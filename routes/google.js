@@ -41,7 +41,7 @@ router.get('/authorize',function(req,res,next){
 		query: {
 			client_id: config.get('google.client_id'),
 			redirect_uri: 'http://' + config.get('google.redirect_domain') + '/google/authorized',
-			scope: 'email profile',
+			scope: 'email profile https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.labels https://www.googleapis.com/auth/gmail.modify',
 			response_type: 'code'
 		}
 	}
@@ -111,26 +111,7 @@ console.log('profile is %s',util.inspect(profile))
  				}	
  			}
  			
-// 			var setOnInsert = {
-//				email: email,
-//				created_at: new Date()	
-// 			};
  			
- 			if(req.session.invite){
-// 				setOnInsert['configurations'] = [{
-// 					id: req.session.invite.configuration_id,
-// 					invited_by: req.session.invite.inviter_id
-// 				}];
- 				
- 				updateSet['$addToSet'] = {
- 					configurations: {
- 						id: req.session.invite.configuration_id,
- 	 					invited_by: req.session.invite.inviter_id,
- 	 					accepted_at: new Date()
- 					}	
- 				}
- 				delete req.session.invite;
- 			}
  			
  			users.findAndModify({
  				'google.id': google.id
