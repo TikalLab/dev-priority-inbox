@@ -32,6 +32,7 @@
     "valid-url": "*",
     "iron_mq": "*",
     "base-64": "*",
+    "email-addresses": "*",
     "serve-favicon": "~2.3.0"
   }
 }

@@ -32,6 +32,7 @@ var async = require('async');
 var request = require('request');
 var _ = require('underscore');
 var base64 = require('base-64')
+var emailAddresses = require('email-addresses')
 var errorHandler = require('../app_modules/error');
 
 router.get('/authorize',function(req,res,next){
@@ -171,7 +172,7 @@ router.post('/push',function(req,res,next){
 		function(callback){
 			var users = req.db.get('users');
 			users.findOne({email: data.emailAddress},function(err,user){
-console.log('user is %s',util.inspect(user))			
+//console.log('user is %s',util.inspect(user))			
 				callback(err,user)
 			})
 		},	  
@@ -184,7 +185,7 @@ console.log('user is %s',util.inspect(user))
 			var form = {
 				startHistoryId : user.google.last_processed_history_id ? user.google.last_processed_history_id  : user.google.watch.historyId
 			}
-console.log('message id is %s',req.body.message.message_id)			
+//console.log('message id is %s',req.body.message.message_id)			
  			request('https://www.googleapis.com/gmail/v1/users/' + user.google.id + '/history',{headers: headers,qs: form},function(error,response,body){
  				if(error){
  					callback(error);
@@ -200,7 +201,7 @@ console.log('message id is %s',req.body.message.message_id)
 		},	
 		// go through all messages in history and process if needed
 		function(user,history,callback){
-console.log('history is %s',util.inspect(history))			
+//console.log('history is %s',util.inspect(history))			
 			async.each(history.history,function(historyItem,callback){
 				if(!('messagesAdded' in historyItem)){
 					callback()
@@ -209,7 +210,9 @@ console.log('history is %s',util.inspect(history))
 						if(_.contains(messageAdded.message.labelIds,'INBOX')){
 							console.log('found a new message!')
 							// TBD process it
-							callback()
+							processInboxMessage(user,messageAdded.message,function(err){
+								callback(err)
+							})
 						}else{
 							callback()
 						}
@@ -261,5 +264,45 @@ console.log('history is %s',util.inspect(history))
 	
 	
 })
+
+
+function processInboxMessage(user,message,callback){
+	async.waterfall([
+		function(callback){
+			var headers = {
+				Authorization: 'Bearer ' + user.google.access_token,
+				'Content-type': 'application/json'
+			}
+			request('https://www.googleapis.com/gmail/v1/users/' + user.google.id + '/messages/' + message.id,{headers: headers},function(error,response,body){
+				if(error){
+					callback(error);
+				}else if(response.statusCode > 300){
+					console.log(response.statusCode + ' : ' + body)
+					
+					callback(response.statusCode + ' : ' + body);
+				}else{
+					var message = JSON.parse(body);
+					callback(null,message);
+				}
+			});			
+		},
+		function(message,callback){
+			var fromHeader  = _.find(message.payload.headers,function(header){
+				return header.name == 'From'
+			});
+			var fromEmail = emailAddresses.parseOneAddress(fromHeader.value).address
+console.log('email is from %s',fromEmail)			
+			if(fromEmail == 'notifications@github.com'){
+				// TBD process github message
+			}else{
+				callback(null,message)
+			}
+			
+		}
+	],function(err,message){
+console.log('message is %s',util.inspect(message,{depth:8}))		
+		callback(err)
+	})
+}
 
 module.exports = router;
