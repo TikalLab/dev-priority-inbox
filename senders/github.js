@@ -2,6 +2,7 @@ var githubAPI = require('../app_modules/github')
 
 module.exports = {
 	process: function(accessToken,message,callback){
+console.log('received this message: %s',message)		
 		if(message.indexOf('You can view, comment on, or merge this pull request online at') > 0){
 			processPullRequest(accessToken,message,callback)
 		}else{

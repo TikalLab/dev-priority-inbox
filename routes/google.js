@@ -297,7 +297,7 @@ function processInboxMessage(user,message,callback){
 			var fromEmail = emailAddresses.parseOneAddress(fromHeader.value).address
 console.log('email is from %s',fromEmail)			
 			if(fromEmail == 'notifications@github.com'){
-				githubSender.process(user.github.accerss_token,message.payload.parts[0],function(err,data){
+				githubSender.process(user.github.accerss_token,message.payload.parts[0].body,function(err,data){
 					callback(err,data)
 				})
 			}else{
