@@ -2,7 +2,8 @@
 	"google": {
 		"client_id": "870441718643-es2aph4q1n3t8iv4v2nk0k062vaeb7ne.apps.googleusercontent.com",
 		"client_secret": "sKPpL3ikRlYOzXP-jWdc7EGD",
-		"redirect_domain": "localhost:3000"
+		"redirect_domain": "localhost:3000",
+		"topic": "projects/dev-priority-inbox/topics/mytopic"
 	},
 	"app": {
 		"name": "dpi_dev",

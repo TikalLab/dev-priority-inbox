@@ -89,8 +89,28 @@ console.log('profile is %s',util.inspect(profile))
  				}
  			});
  		},
- 		// insert/update the user record to db
+ 		// add a watch to their gmail to send push to our app 
  		function(accessToken,profile,callback){
+ 			var headers = {
+ 				Authorization: 'Bearer ' + accessToken	
+ 			}
+ 			var form = {
+ 				topicName: config.get('google.topic')
+ 			}
+ 			request('https://www.googleapis.com/gmail/v1/users/' + profile.id + '/watch',{headers: headers, body: JSON.stringify(form)},function(error,response,body){
+ 				if(error){
+ 					callback(error);
+ 				}else if(response.statusCode > 300){
+ 					callback(response.statusCode + ' : ' + body);
+ 				}else{
+ 					var watch = JSON.parse(body);
+console.log('profile is %s',util.inspect(watch))
+ 					callback(null,accessToken,profile,watch);
+ 				}
+ 			});
+ 		},
+ 		// insert/update the user record to db
+ 		function(accessToken,profile,watch,callback){
  			var users = req.db.get('users');
  			var email = profile.emails[0].value;
  			var google = {
@@ -98,7 +118,8 @@ console.log('profile is %s',util.inspect(profile))
  				display_name: profile.displayName,
  				name: profile.name,
  				access_token: accessToken,
- 				avatar_url: profile.image.url
+ 				avatar_url: profile.image.url,
+ 				watch: watch
  			}
  			
  			var updateSet = {
