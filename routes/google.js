@@ -218,9 +218,9 @@ console.log('history is %s',util.inspect(history))
 					})
 				}
 			},function(err){
-				callback(err)
+				callback(err,user,history)
 			})
-		}
+		},
 //		function(user,callback){
 //			var headers = {
 // 				Authorization: 'Bearer ' + user.google.access_token,
@@ -239,8 +239,16 @@ console.log('history is %s',util.inspect(history))
 // 					callback(null,user,message);
 // 				}
 // 			});			
-//		},	                 
-	],function(err,user,history){
+//		},	
+		
+		// got so far? update the history in user record so we wont repeat it next itteration
+		function(user,history,callback){
+			var users = req.db.get('users');
+			users.update({_id: user._id.toString()},{$set:{'google.last_processed_history_id' : data.historyId}},function(err,ok){
+				callback(err)
+			})
+		},
+	],function(err){
 		if(err){
 			console.log('err is %s',err)
 			res.sendStatus(500)

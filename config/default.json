@@ -18,8 +18,8 @@
 		}
 	},
 	"github": {
-		"client_id": "5267aa730e157549ec32",
-		"client_secret": "11e56c25e5d4fd543af78c32d8909c27ba29eff8",
+		"client_id": "cd3aaa6ba16424757916",
+		"client_secret": "902ba0f9cbd003b19e023ec120dde3c547c677ef",
 		"redirect_domain": "localhost:3000",
 		"webhook_domain": "facetogether.ngrok.io",
 		"hook_secret": "MyBloodyValentine"

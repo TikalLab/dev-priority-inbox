@@ -21,7 +21,7 @@ var db = monk(mongoUri);
 //var users = require('./routes/users');
 //var admin = require('./routes/admin');
 var google = require('./routes/google');
-//var github = require('./routes/github');
+var github = require('./routes/github');
 //var admin = require('./routes/admin');
 
 var app = express();
@@ -66,7 +66,7 @@ app.use(function(req,res,next){
 //app.use('/', users);
 //app.use('/admin', admin);
 app.use('/google', google);
-//app.use('/github', github);
+app.use('/github', github);
 
 
 // catch 404 and forward to error handler
