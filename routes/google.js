@@ -1,28 +1,3 @@
-//var express = require('express');
-//var router = express.Router();
-//var util = require('util');
-//var config = require('config');
-//var url = require('url');
-//var async = require('async');
-//var request = require('request');
-//var _ = require('underscore');
-//var async = require('async');
-//var fs = require('fs');
-//var path = require('path');
-//
-//module.exports = router;
-//
-//router.get('/authorize',function(req,res,next){
-//	req.passport.authenticate('google', { scope: [
-//      'https://www.googleapis.com/auth/plus.login',
-//      'https://www.googleapis.com/auth/plus.profile.emails.read'
-//    ] });
-//})
-//
-//router.get('/authorized',function(req,res,next){
-//	passport.authenticate('google', { failureRedirect: '/' }),
-//	    res.redirect('/account');
-//})
 var express = require('express');
 var router = express.Router();
 var util = require('util');
@@ -375,20 +350,46 @@ function processInboxMessage(user,message,callback){
 			var fromEmail = emailAddresses.parseOneAddress(fromHeader.value).address
 console.log('email is from %s',fromEmail)			
 			if(fromEmail == 'notifications@github.com'){
-//console.log('its a github message: %s',util.inspect(message,{depth:8}))
-//				console.log('body0: %s',base64.decode(message.payload.parts[0].body.data))
-				githubSender.process(user.github.access_token,base64.decode(message.payload.parts[0].body.data),function(err,data){
-					callback(err,data)
+				githubSender.process(user.github.access_token,base64.decode(message.payload.parts[0].body.data),function(err,isImportant){
+					if(err){
+						callback(err)
+					}else{
+						labelMessage(user,message,isImportant,callback)
+					}
 				})
 			}else{
 				callback(null,message)
 			}
 			
 		}
-	],function(err,message){
-console.log('message is %s',util.inspect(message,{depth:8}))		
+	],function(err){
 		callback(err)
 	})
 }
 
+
+function labelMessage(user,message,isImportant,callback){
+	
+	var labelID = isImportant ? user.google.labels.important.id : user.google.labels.not_important.id;
+	
+	var headers = {
+		Authorization: 'Bearer ' + user.google.access_token,
+		'Content-type': 'application/json'
+	}
+	var form = {
+		addLabelIds: [labelID]	
+	}
+	request.post('https://www.googleapis.com/gmail/v1/users/' + user.google.id + '/messages/' + message.id + '/modify',{headers: headers, body: JSON.stringify(form)},function(error,response,body){
+		if(error){
+			callback(error);
+		}else if(response.statusCode > 300){
+			console.log(response.statusCode + ' : ' + body)
+			
+			callback(response.statusCode + ' : ' + body);
+		}else{
+			var message = JSON.parse(body);
+			callback(null);
+		}
+	});		
+}
 module.exports = router;

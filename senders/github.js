@@ -13,5 +13,14 @@ console.log('received this message: %s',util.inspect(message))
 }
 
 function processPullRequest(accessToken,message,callback){
-	githubAPI.getPullRequest(accessToken,'shaharsol/demo-repo-for-fuseday-2106',2,callback)
+	
+	// extract repo name and pr number
+	
+	// apply rules
+	
+	// callback with either important or not important 
+	
+//	githubAPI.getPullRequest(accessToken,'shaharsol/demo-repo-for-fuseday-2106',2,callback)
+	
+	callback(null,true); // true is important
 }
