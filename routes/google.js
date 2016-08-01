@@ -101,7 +101,6 @@ console.log('profile is %s',util.inspect(watch))
  				id: profile.id,
  				display_name: profile.displayName,
  				name: profile.name,
- 				access_token: accessToken,
  				avatar_url: profile.image.url,
  				watch: watch
  			}
@@ -112,6 +111,9 @@ console.log('profile is %s',util.inspect(watch))
 					created_at: new Date(),
 					google: google
 	 			},
+	 			$set: {
+	 				'google.access_token': accessToken
+	 			}
  			}
  			
  			
