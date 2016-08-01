@@ -1,0 +1,18 @@
+{
+	"google": {
+		"client_id": "870441718643-es2aph4q1n3t8iv4v2nk0k062vaeb7ne.apps.googleusercontent.com",
+		"client_secret": "sKPpL3ikRlYOzXP-jWdc7EGD",
+		"redirect_domain": "localhost:3000",
+		"topic": "projects/dev-priority-inbox/topics/mytopic"
+	},
+	"app": {
+		"name": "dpi_staging",
+		"domain": "localhost:3000",
+	},
+	"github": {
+		"client_id": "cd3aaa6ba16424757916",
+		"client_secret": "902ba0f9cbd003b19e023ec120dde3c547c677ef",
+		"redirect_domain": "localhost:3000",
+		"webhook_domain": "facetogether.ngrok.io",
+	}
+}
