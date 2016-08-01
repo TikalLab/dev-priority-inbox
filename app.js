@@ -17,7 +17,7 @@ var monk = require('monk');
 var mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/dpi';
 var db = monk(mongoUri);
 
-//var index = require('./routes/index');
+var index = require('./routes/index');
 //var users = require('./routes/users');
 //var admin = require('./routes/admin');
 var google = require('./routes/google');
@@ -62,7 +62,7 @@ app.use(function(req,res,next){
 });
 
 
-//app.use('/', index);
+app.use('/', index);
 //app.use('/', users);
 //app.use('/admin', admin);
 app.use('/google', google);
