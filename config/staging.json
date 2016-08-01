@@ -3,7 +3,7 @@
 		"client_id": "651980471382-2vj1199bfs1e9ven4rjl2839urt4dhvq.apps.googleusercontent.com",
 		"client_secret": "yTWEe3kFkfhly7nuMYi_lRC6",
 		"redirect_domain": "dpi-staging.herokuapp.com",
-		"topic": "projects/dev-priority-inbox/topics/mytopic"
+		"topic": "projects/dpi-staging/topics/mytopic"
 	},
 	"app": {
 		"name": "dpi_staging",
