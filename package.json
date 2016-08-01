@@ -33,6 +33,7 @@
     "iron_mq": "*",
     "base-64": "*",
     "email-addresses": "*",
+    "atob": "*",
     "serve-favicon": "~2.3.0"
   }
 }

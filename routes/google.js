@@ -7,6 +7,7 @@ var async = require('async');
 var request = require('request');
 var _ = require('underscore');
 var base64 = require('base-64')
+var atob = require('atob')
 var emailAddresses = require('email-addresses')
 
 var githubAPI = require('../app_modules/github')
@@ -193,7 +194,7 @@ console.log('profile is %s',util.inspect(watch))
  							$set:{
  								'google.labels' : {
  									important: results[0],
- 									not_importanr: results[1]
+ 									not_important: results[1]
  								}
  							}
  						},{
@@ -224,7 +225,8 @@ console.log('profile is %s',util.inspect(watch))
 
 router.post('/push',function(req,res,next){
 	
-	var data = JSON.parse(base64.decode(req.body.message.data))
+//	var data = JSON.parse(base64.decode(req.body.message.data))
+	var data = JSON.parse(atob(req.body.message.data))
 	console.log('data is %s',util.inspect(data))
 
 	async.waterfall([
@@ -346,13 +348,15 @@ function processInboxMessage(user,message,callback){
 			});			
 		},
 		function(message,callback){
+			
 			var fromHeader  = _.find(message.payload.headers,function(header){
 				return header.name == 'From'
 			});
 			var fromEmail = emailAddresses.parseOneAddress(fromHeader.value).address
 console.log('email is from %s',fromEmail)			
 			if(fromEmail == 'notifications@github.com'){
-				githubSender.process(user.github.access_token,base64.decode(message.payload.parts[0].body.data),function(err,isImportant){
+console.log('email is %s',util.inspect(message,{depth:8}))			
+				githubSender.process(user.github.access_token,atob(message.payload.parts[0].body.data),function(err,isImportant){
 					if(err){
 						callback(err)
 					}else{
