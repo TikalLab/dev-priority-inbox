@@ -7,11 +7,11 @@
 	},
 	"app": {
 		"name": "dpi_staging",
-		"domain": "dpi-staging.herokuapp.com",
+		"domain": "dpi-staging.herokuapp.com"
 	},
 	"github": {
 		"client_id": "014c68188e70593ea213",
 		"client_secret": "3412eb52def533318a0ee1057f9c4f8912eff94c",
-		"redirect_domain": "dpi-staging.herokuapp.com",
+		"redirect_domain": "dpi-staging.herokuapp.com"
 	}
 }
