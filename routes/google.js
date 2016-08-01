@@ -24,7 +24,9 @@ router.get('/authorize',function(req,res,next){
 			client_id: config.get('google.client_id'),
 			redirect_uri: 'http://' + config.get('google.redirect_domain') + '/google/authorized',
 			scope: 'email profile https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.labels https://www.googleapis.com/auth/gmail.modify',
-			response_type: 'code'
+			response_type: 'code',
+			access_type: 'offline',
+			approval_prompt: 'force'
 		}
 	}
 	res.redirect(url.format(redirect));
@@ -50,12 +52,13 @@ router.get('/authorized',function(req,res,next){
  					var data = JSON.parse(body);
 console.log('got from googile: %s',body) 	
  					var accessToken = data.access_token;
- 					callback(null,accessToken);
+					var refreshToken = data.refresh_token;
+ 					callback(null,accessToken,refreshToken);
  				}
  			});
  		},
  		// get the google user record
- 		function(accessToken,callback){
+ 		function(accessToken,refreshToken,callback){
  			var headers = {
  				Authorization: 'Bearer ' + accessToken	
  			}
@@ -67,12 +70,12 @@ console.log('got from googile: %s',body)
  				}else{
  					var profile = JSON.parse(body);
 console.log('profile is %s',util.inspect(profile))
- 					callback(null,accessToken,profile);
+ 					callback(null,accessToken,refreshToken,profile);
  				}
  			});
  		},
  		// add a watch to their gmail to send push to our app 
- 		function(accessToken,profile,callback){
+ 		function(accessToken,refreshToken,profile,callback){
  			var headers = {
  				Authorization: 'Bearer ' + accessToken,
  				'Content-type': 'application/json'
@@ -90,15 +93,16 @@ console.log('profile is %s',util.inspect(profile))
  				}else{
  					var watch = JSON.parse(body);
 console.log('profile is %s',util.inspect(watch))
- 					callback(null,accessToken,profile,watch);
+ 					callback(null,accessToken,refreshToken,profile,watch);
  				}
  			});
  		},
  		// insert/update the user record to db
- 		function(accessToken,profile,watch,callback){
+ 		function(accessToken,refreshToken,profile,watch,callback){
  			var users = req.db.get('users');
  			var email = profile.emails[0].value;
  			var google = {
+ 				refresh_token: refreshToken,
  				id: profile.id,
  				display_name: profile.displayName,
  				name: profile.name,
@@ -112,9 +116,6 @@ console.log('profile is %s',util.inspect(watch))
 					created_at: new Date(),
 					google: google
 	 			},
-	 			$set: {
-	 				'google.access_token': accessToken
-	 			}
  			}
  			
  			
@@ -125,10 +126,10 @@ console.log('profile is %s',util.inspect(watch))
  				upsert: true,
  				new: true
  			},function(err,user){
- 				callback(err,user)
+ 				callback(err,user,accessToken)
  			});
  		},
- 		function(user,callback){
+ 		function(user,accessToken,callback){
  			if('labels' in user.google){
  				callback(null,user)
  			}else{
@@ -136,7 +137,7 @@ console.log('profile is %s',util.inspect(watch))
 	 		 		// create the folders
 	 		 		function(callback){
 	 		 			var headers = {
-	 		 				Authorization: 'Bearer ' + user.google.access_token,
+	 		 				Authorization: 'Bearer ' + accessToken,
 	 		 				'Content-type': 'application/json'
 	 		 			}
 	 		 			var form = {
@@ -147,7 +148,7 @@ console.log('profile is %s',util.inspect(watch))
 	 		 					callback(error);
 	 		 				}else if(response.statusCode == 409){
 	 		 					// this means label already exists
-	 		 					callback(null,accessToken,profile,watch,null);
+	 		 					callback(null,null);
 	 		 				}else if(response.statusCode > 300){
 	 		 					console.log(response.statusCode + ' : ' + body)
 	 		 					callback(response.statusCode + ' : ' + body);
@@ -160,7 +161,7 @@ console.log('profile is %s',util.inspect(watch))
 	 		 		},
 	 		 		function(callback){
 	 		 			var headers = {
-	 		 				Authorization: 'Bearer ' + user.google.access_token,
+	 		 				Authorization: 'Bearer ' + accessToken,
 	 		 				'Content-type': 'application/json'
 	 		 			}
 	 		 			var form = {
@@ -171,7 +172,7 @@ console.log('profile is %s',util.inspect(watch))
 	 		 					callback(error);
 	 		 				}else if(response.statusCode == 409){
 	 		 					// this means label already exists
-	 		 					callback(null,accessToken,profile,watch,dpiImportantLabel,null);
+	 		 					callback(null,null);
 	 		 				}else if(response.statusCode > 300){
 	 		 					console.log(response.statusCode + ' : ' + body)
 	 		 					callback(response.statusCode + ' : ' + body);
@@ -225,7 +226,6 @@ console.log('profile is %s',util.inspect(watch))
 
 router.post('/push',function(req,res,next){
 	
-//	var data = JSON.parse(base64.decode(req.body.message.data))
 	var data = JSON.parse(atob(req.body.message.data))
 	console.log('data is %s',util.inspect(data))
 
@@ -233,14 +233,40 @@ router.post('/push',function(req,res,next){
 		function(callback){
 			var users = req.db.get('users');
 			users.findOne({email: data.emailAddress},function(err,user){
-//console.log('user is %s',util.inspect(user))			
 				callback(err,user)
 			})
-		},	  
-		// get history
+		},	
+		// refresh token
 		function(user,callback){
+			if(!user){
+				callback('user wasnt found')
+			}else{
+				var form = {
+					client_id: config.get('google.client_id'),
+					client_secret: config.get('google.client_secret'),
+					grant_type: 'refresh_token',
+					refresh_token: user.google.refresh_token,
+				};
+				request.post('https://www.googleapis.com/oauth2/v4/token',{form: form},function(error,response,body){
+					if(error){
+						callback(error,null);
+					}else if(response.statusCode != 200){
+						callback(response.statusCode + ' : ' + body);
+					}else{
+						var result = JSON.parse(body);
+	console.log('got refershed token: %s',result.access_token)					
+						callback(null,user,result.access_token);
+					}
+					
+				})
+				
+			}
+		
+		},
+		// get history
+		function(user,accessToken,callback){
 			var headers = {
- 				Authorization: 'Bearer ' + user.google.access_token,
+ 				Authorization: 'Bearer ' + accessToken,
  				'Content-type': 'application/json'
  			}
 			var form = {
@@ -256,64 +282,50 @@ router.post('/push',function(req,res,next){
  					callback(response.statusCode + ' : ' + body);
  				}else{
  					var history = JSON.parse(body);
- 					callback(null,user,history);
+console.log('history is %s',util.inspect(history))			
+ 					callback(null,user,accessToken,history);
  				}
  			});			
 		},	
 		// go through all messages in history and process if needed
-		function(user,history,callback){
-//console.log('history is %s',util.inspect(history))			
-			async.each(history.history,function(historyItem,callback){
-				if(!('messagesAdded' in historyItem)){
-					callback()
-				}else{
-					async.each(historyItem.messagesAdded,function(messageAdded,callback){
-						if(_.contains(messageAdded.message.labelIds,'INBOX')){
-							console.log('found a new message!')
-							// TBD process it
-							processInboxMessage(user,messageAdded.message,function(err){
-								callback(err)
-							})
-						}else{
-							callback()
-						}
-					},function(err){
-						callback(err)
-					})
-				}
-			},function(err){
-				callback(err,user,history)
-			})
+		function(user,accessToken,history,callback){
+			if(!('history') in history){
+				callback(null,user,history)
+			}else{
+				async.each(history.history,function(historyItem,callback){
+					if(!('messagesAdded' in historyItem)){
+						callback()
+					}else{
+						async.each(historyItem.messagesAdded,function(messageAdded,callback){
+							if(_.contains(messageAdded.message.labelIds,'INBOX')){
+								console.log('found a new message!')
+								// TBD process it
+								processInboxMessage(user,accessToken,messageAdded.message,function(err){
+									callback(err)
+								})
+							}else{
+								callback()
+							}
+						},function(err){
+							callback(err)
+						})
+					}
+				},function(err){
+					callback(err,user,accessToken,history)
+				})
+			}
 		},
-//		function(user,callback){
-//			var headers = {
-// 				Authorization: 'Bearer ' + user.google.access_token,
-// 				'Content-type': 'application/json'
-// 			}
-//console.log('message id is %s',req.body.message.message_id)			
-// 			request('https://www.googleapis.com/gmail/v1/users/' + user.google.id + '/messages/' + req.body.message.message_id,{headers: headers},function(error,response,body){
-// 				if(error){
-// 					callback(error);
-// 				}else if(response.statusCode > 300){
-// 					console.log(response.statusCode + ' : ' + body)
-// 					
-// 					callback(response.statusCode + ' : ' + body);
-// 				}else{
-// 					var message = JSON.parse(body);
-// 					callback(null,user,message);
-// 				}
-// 			});			
-//		},	
-		
 		// got so far? update the history in user record so we wont repeat it next itteration
-		function(user,history,callback){
+		function(user,history,accessToken,callback){
 			var users = req.db.get('users');
 			users.update({_id: user._id.toString()},{$set:{'google.last_processed_history_id' : data.historyId}},function(err,ok){
 				callback(err)
 			})
 		},
 	],function(err){
-		if(err){
+		if(err == 'user wasnt found'){
+			res.sendStatus(200) // quiet ggole
+		}else if(err){
 			console.log('err is %s',err)
 			res.sendStatus(500)
 		}else{
@@ -327,11 +339,11 @@ router.post('/push',function(req,res,next){
 })
 
 
-function processInboxMessage(user,message,callback){
+function processInboxMessage(user,accessToken,message,callback){
 	async.waterfall([
 		function(callback){
 			var headers = {
-				Authorization: 'Bearer ' + user.google.access_token,
+				Authorization: 'Bearer ' + accessToken,
 				'Content-type': 'application/json'
 			}
 			request('https://www.googleapis.com/gmail/v1/users/' + user.google.id + '/messages/' + message.id,{headers: headers},function(error,response,body){
@@ -360,7 +372,7 @@ console.log('email is %s',util.inspect(message,{depth:8}))
 					if(err){
 						callback(err)
 					}else{
-						labelMessage(user,message,isImportant,callback)
+						labelMessage(user,accessToken,message,isImportant,callback)
 					}
 				})
 			}else{
@@ -374,12 +386,12 @@ console.log('email is %s',util.inspect(message,{depth:8}))
 }
 
 
-function labelMessage(user,message,isImportant,callback){
+function labelMessage(user,accessToken,message,isImportant,callback){
 	
 	var labelID = isImportant ? user.google.labels.important.id : user.google.labels.not_important.id;
 	
 	var headers = {
-		Authorization: 'Bearer ' + user.google.access_token,
+		Authorization: 'Bearer ' + accessToken,
 		'Content-type': 'application/json'
 	}
 	var form = {
