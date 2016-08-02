@@ -21,5 +21,30 @@ module.exports = {
 				callback(null,JSON.parse(body));
 			}
 		}); 
+	},	
+	getRepo: function(accessToken,repo,callback){
+		var headers = this.getAPIHeaders(accessToken);
+		request('https://api.github.com/repos/' + repo,{headers: headers},function(error,response,body){
+			if(error){
+				callback(error);
+			}else if(response.statusCode > 300){
+				callback(response.statusCode + ' : ' + body);
+			}else{
+				callback(null,JSON.parse(body));
+			}
+		}); 
+	},
+	getMe: function(accessToken,callback){
+		var headers = this.getAPIHeaders(accessToken);
+		request('https://api.github.com/user',{headers: headers},function(error,response,body){
+			if(error){
+				callback(error);
+			}else if(response.statusCode > 300){
+				callback(response.statusCode + ' : ' + body);
+			}else{
+				callback(null,JSON.parse(body));
+			}
+		}); 
 	}	
+
 }
