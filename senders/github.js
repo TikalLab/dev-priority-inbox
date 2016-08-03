@@ -1,5 +1,6 @@
 var githubAPI = require('../app_modules/github')
 var util = require('util')
+var async = require('async')
 
 var prIsOnRepoICreated = require('../rules/github/pull-request/pr-is-on-repo-i-created')
 

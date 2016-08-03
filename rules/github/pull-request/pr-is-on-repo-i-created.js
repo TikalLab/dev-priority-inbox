@@ -1,6 +1,9 @@
-var github = require('../api-modules/github')
+var path = require('path')
+var github = require(path.join(__dirname,'../../../app_modules/github'))
+//var github = require('../app_modules/github')
+var async = require('async')
 
-modules.exports = {
+module.exports = {
 	apply: function(accessToken,repo,pullRequestNumber,callback){
 		async.parallel([
 			function(callback){
