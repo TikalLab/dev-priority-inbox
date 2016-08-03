@@ -81,7 +81,9 @@ console.log('profile is %s',util.inspect(profile))
  				'Content-type': 'application/json'
  			}
  			var form = {
- 				topicName: config.get('google.topic')
+ 				topicName: config.get('google.topic'),
+ 				labelIds: ['INBOX'],
+ 				labelFilterAction: 'include'
  			}
  			request.post('https://www.googleapis.com/gmail/v1/users/' + profile.id + '/watch',{headers: headers, body: JSON.stringify(form)},function(error,response,body){
  				if(error){
