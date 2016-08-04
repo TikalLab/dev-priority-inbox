@@ -50,11 +50,11 @@ module.exports = {
 				var me = results[0];
 				var commits = results[1];
 				
-				var didCommit = _.find(commits,function(comment){
-					return comment.user.login == me.login
+				var didCommitOnce = _.find(commits,function(comment){
+					return commit.committer.login == me.login || commit.author.login == me.login
 				})
 				
-				callback(err,isParticipating)
+				callback(err,didCommitOnce)
 			}
 		})
 	}	

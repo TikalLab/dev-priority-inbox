@@ -14,6 +14,7 @@ var pullRequestRules = [
 	prIsOnRepoICreated                     	
 ]
 var commitRules = [
+	ICommittedThisFileOnce
 ]
 var issueRules = [
 	IParticiapteInDiscussion

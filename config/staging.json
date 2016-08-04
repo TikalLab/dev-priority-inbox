@@ -7,6 +7,7 @@
 	},
 	"app": {
 		"name": "dpi_staging",
+		"label_name": "DPI-staging Important", 
 		"domain": "dpi-staging.herokuapp.com"
 	},
 	"github": {

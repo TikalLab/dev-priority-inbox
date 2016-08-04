@@ -135,7 +135,7 @@ console.log('profile is %s',util.inspect(watch))
  			if('labels' in user.google){
  				callback(null,user)
  			}else{
-				async.parallel([
+				async.waterfall([
 	 		 		// create the folders
 	 		 		function(callback){
 	 		 			var headers = {
@@ -143,7 +143,7 @@ console.log('profile is %s',util.inspect(watch))
 	 		 				'Content-type': 'application/json'
 	 		 			}
 	 		 			var form = {
-	 		 				name: 'DPI Important'
+	 		 				name: config.get('app.label_name')
 	 		 			}
 	 		 			request.post('https://www.googleapis.com/gmail/v1/users/' + user.google.id + '/labels',{headers: headers, body: JSON.stringify(form)},function(error,response,body){
 	 		 				if(error){
@@ -161,32 +161,8 @@ console.log('profile is %s',util.inspect(watch))
 	 		 				}
 	 		 			});
 	 		 		},
-	 		 		function(callback){
-	 		 			var headers = {
-	 		 				Authorization: 'Bearer ' + accessToken,
-	 		 				'Content-type': 'application/json'
-	 		 			}
-	 		 			var form = {
-	 		 				name: 'DPI Not Important'
-	 		 			}
-	 		 			request.post('https://www.googleapis.com/gmail/v1/users/' + user.google.id + '/labels',{headers: headers, body: JSON.stringify(form)},function(error,response,body){
-	 		 				if(error){
-	 		 					callback(error);
-	 		 				}else if(response.statusCode == 409){
-	 		 					// this means label already exists
-	 		 					callback(null,null);
-	 		 				}else if(response.statusCode > 300){
-	 		 					console.log(response.statusCode + ' : ' + body)
-	 		 					callback(response.statusCode + ' : ' + body);
-	 		 				}else{
-	 		 					var dpiNotImportantLabel = JSON.parse(body);
-	 		console.log('dpiNotImportantLabel is %s',util.inspect(dpiNotImportantLabel))
-	 		 					callback(null,dpiNotImportantLabel);
-	 		 				}
-	 		 			});
-	 		 		},
 				 				                 
-				],function(err,results){
+				],function(err,dpiImportantLabel){
  					if(err){
  						callback(err)
  					}else{
@@ -196,8 +172,7 @@ console.log('profile is %s',util.inspect(watch))
  						},{
  							$set:{
  								'google.labels' : {
- 									important: results[0],
- 									not_important: results[1]
+ 									important: dpiImportantLabel,
  								}
  							}
  						},{
@@ -375,7 +350,11 @@ console.log('email is %s',util.inspect(message,{depth:8}))
 					if(err){
 						callback(err)
 					}else{
-						labelMessage(user,accessToken,message,isImportant,callback)
+						if(isImportant){
+							labelMessage(user,accessToken,message,isImportant,callback)
+						}else{
+							callback()
+						}
 					}
 				})
 			}else{
@@ -391,7 +370,7 @@ console.log('email is %s',util.inspect(message,{depth:8}))
 
 function labelMessage(user,accessToken,message,isImportant,callback){
 	
-	var labelID = isImportant ? user.google.labels.important.id : user.google.labels.not_important.id;
+	var labelID = user.google.labels.important.id;
 	
 	var headers = {
 		Authorization: 'Bearer ' + accessToken,

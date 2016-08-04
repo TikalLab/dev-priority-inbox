@@ -7,6 +7,7 @@
 	},
 	"app": {
 		"name": "dpi_dev",
+		"label_name": "DPI-dev Important", 
 		"email": "daily@snapgluedev.com",
 		"domain": "localhost:3000",
 		"unsubscribe_secret": "NineInchNails",
