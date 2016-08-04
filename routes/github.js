@@ -99,7 +99,7 @@ router.get('/authorized',function(req,res,next){
  			if(!next){
  				next = '/';
  			}
- 			res.redirect(next);
+ 			res.redirect('/');
  		}
  	});
 })

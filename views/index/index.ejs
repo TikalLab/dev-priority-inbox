@@ -1,0 +1,7 @@
+<% if(!user){ %>
+<a href="/google/authorize">connect google</a>
+<% }else if('github' in user){ %>
+<a href="/github/authorize">connect google</a>
+<% }else{ %>
+All done...
+<% } %>
