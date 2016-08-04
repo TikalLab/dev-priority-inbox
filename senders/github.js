@@ -9,6 +9,11 @@ var prIsOnRepoICreated = require('../rules/github/pull-request/pr-is-on-repo-i-c
 var pullRequestRules = [
 	prIsOnRepoICreated                     	
 ]
+var commitRules = [
+]
+var issueRules = [
+]
+
 module.exports = {
 	process: function(accessToken,message,callback){
 console.log('received this message: %s',util.inspect(message))	
@@ -24,40 +29,45 @@ console.log('received this message: %s',util.inspect(message))
 		var id = parts[4];
 	
 console.log('parts are %s',util.inspect(parts))		
-		
+		var rules;
 		switch(parts[3]){
 		case 'pull':
-			processPullRequest(accessToken,message,callback);
+			rules = pullRequestRules;
 			break;
 		case 'commit':
-			processCommit(accessToken,message,callback);
+			rules = commitRules;
 			break;
 		case 'issues':
-			processIssue(accessToken,message,callback);
+			rules = issueRules;
 			break;
-		default:
+		}
+		
+		if(rules){
+			applyRules(ruels,accessToken,message,repo,id,callback)
+		}else{
 			callback()
 		}
 		
-//		console.log('HREF is %s',a.attr('href'));
-//
-//		if(a.indexOf('/pull/') > 0){
-//			processPullRequest(accessToken,message,callback)
-//		}else if(a.indexOf('/commit/'){
-//			processCommit(accessToken,message,callback)
-//		}else if(a.indexOf('/issue/'){
-//			processIssue(accessToken,message,callback)
-//		}else{
-//			callback()
-//		}
 	}	
 }
 
-function processPullRequest(accessToken,message,callback){
+function applyRules(rules,accessToken,message,repo,id,callback){
 	
-	// extract repo name and pr number
-	var repo = 'shaharsol/demo-repo-for-fuseday-2106';
-	var pullRequestNumber = '2';
+	// apply rules
+	async.detect(rules,function(rule,callback){
+		rule.apply(accessToken,repo,id,callback)
+	},function(err,isImportant){
+		callback(err,isImportant)
+	})
+	
+	// callback with either important or not important 
+	
+//	githubAPI.getPullRequest(accessToken,'shaharsol/demo-repo-for-fuseday-2106',2,callback)
+	
+//	callback(null,true); // true is important
+}
+
+function processPullRequest(accessToken,message,repo,pullRequestNumber,callback){
 	
 	// apply rules
 	async.detect(pullRequestRules,function(rule,callback){
