@@ -34,6 +34,7 @@
     "base-64": "*",
     "email-addresses": "*",
     "atob": "*",
+    "cheerio": "*",
     "serve-favicon": "~2.3.0"
   }
 }

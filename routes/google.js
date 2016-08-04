@@ -370,7 +370,8 @@ function processInboxMessage(user,accessToken,message,callback){
 console.log('email is from %s',fromEmail)			
 			if(fromEmail == 'notifications@github.com'){
 console.log('email is %s',util.inspect(message,{depth:8}))			
-				githubSender.process(user.github.access_token,atob(message.payload.parts[0].body.data),function(err,isImportant){
+//				githubSender.process(user.github.access_token,atob(message.payload.parts[0].body.data),function(err,isImportant){
+				githubSender.process(user.github.access_token,atob(message.payload.parts[1].body.data),function(err,isImportant){
 					if(err){
 						callback(err)
 					}else{
