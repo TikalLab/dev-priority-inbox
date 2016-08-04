@@ -44,6 +44,9 @@ module.exports = {
 				callback(err)
 			}else{
 				
+				/*
+				 * TBD finish this function
+				 */
 				var me = results[0];
 				var commits = results[1];
 				
