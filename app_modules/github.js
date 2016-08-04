@@ -45,6 +45,37 @@ module.exports = {
 				callback(null,JSON.parse(body));
 			}
 		}); 
-	}	
+	},
+	getIssueComments: function(accessToken,repo,issueNumber,callback){
+		var headers = this.getAPIHeaders(accessToken);
+		var comments = [];
+		var page = 1;
+		var linkHeader;
+		
+		async.whilst(
+			function(){
+				return page;
+			},
+			function(callback){
+				request('https://api.github.com/repos/' + repo + '/issues/' + issueNumber + '/comments?page=' + page,{headers: headers},function(error,response,body){
+					if(error){
+						callback(error);
+					}else if(response.statusCode > 300){
+						callback(response.statusCode + ' : ' + body);
+					}else{
+						var data = JSON.parse(body)
+						comments = comments.concat(data);
+						linkHeader = parseLinkHeader(response.headers.link);
+						page = (linkHeader? ('next' in linkHeader ? linkHeader.next.page : false) : false);
+						callback(null,repos);
+					}
+				});	
+			},
+			function(err,comments){
+				callback(err,comments)
+			}
+		);
+			
+	},	
 
 }
