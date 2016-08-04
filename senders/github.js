@@ -6,12 +6,15 @@ var url = require('url');
 
 var prIsOnRepoICreated = require('../rules/github/pull-request/pr-is-on-repo-i-created')
 
+var IParticiapteInDiscussion = require('../rules/github/issue/i-participate-in-discussion')
+
 var pullRequestRules = [
 	prIsOnRepoICreated                     	
 ]
 var commitRules = [
 ]
 var issueRules = [
+	IParticiapteInDiscussion
 ]
 
 module.exports = {
@@ -43,7 +46,7 @@ console.log('parts are %s',util.inspect(parts))
 		}
 		
 		if(rules){
-			applyRules(ruels,accessToken,message,repo,id,callback)
+			applyRules(rules,accessToken,message,repo,id,callback)
 		}else{
 			callback()
 		}

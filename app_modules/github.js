@@ -1,6 +1,8 @@
 var config = require('config');
 var request = require('request');
 var util = require('util')
+var async = require('async')
+var parseLinkHeader = require('parse-link-header');
 
 module.exports = {
 	getAPIHeaders: function(accessToken){
@@ -67,7 +69,7 @@ module.exports = {
 						comments = comments.concat(data);
 						linkHeader = parseLinkHeader(response.headers.link);
 						page = (linkHeader? ('next' in linkHeader ? linkHeader.next.page : false) : false);
-						callback(null,repos);
+						callback(null,comments);
 					}
 				});	
 			},
