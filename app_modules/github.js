@@ -91,5 +91,40 @@ module.exports = {
 		);
 			
 	},	
+	getFileCommits: function(accessToken,repo,file,callback){
+		var headers = this.getAPIHeaders(accessToken);
+		var commits = [];
+		var page = 1;
+		var linkHeader;
+		
+		async.whilst(
+			function(){
+				return page;
+			},
+			function(callback){
+				var qs = {
+					page: page,
+					file: file
+				}
+				request('https://api.github.com/repos/' + repo + '/commits',{headers: headers, qs: qs},function(error,response,body){
+					if(error){
+						callback(error);
+					}else if(response.statusCode > 300){
+						callback(response.statusCode + ' : ' + body);
+					}else{
+						var data = JSON.parse(body)
+						commits = commits.concat(data);
+						linkHeader = parseLinkHeader(response.headers.link);
+						page = (linkHeader? ('next' in linkHeader ? linkHeader.next.page : false) : false);
+						callback(null,commits);
+					}
+				});	
+			},
+			function(err,commits){
+				callback(err,commits)
+			}
+		);
+			
+	},	
 
 }

@@ -14,20 +14,29 @@ module.exports = {
 			},	
 			function(callback){
 				async.waterfall([
-// get commit
-function(callback){
-	github.getCommit(accessToken,repo,sha,function(err,commit){
-		callback(err,commit)
-	})
-},
-function(commit,callback){
-	
-}
-				],function(){
-					
-				})
-				github.getIssueComments(accessToken,repo,issueNumber,function(err,comments){
-					callback(err,comments)
+					// get commit
+					function(callback){
+						github.getCommit(accessToken,repo,sha,function(err,commit){
+							callback(err,commit)
+						})
+					},
+					function(commit,callback){
+						var commits = [];
+						async.each(commit.files,function(file,callback){
+							github.getFileCommits(accessToken,repo,file,function(err,fileCommits){
+								if(err){
+									callback(err)
+								}else{
+									commits = commits.concat(fileCommits)
+									callback()
+								}
+							})
+						},function(err){
+							callback(err,commit,commits)
+						})
+					}
+				],function(err,commit,commits){
+					callback(err,commits)
 				})
 			},	
 		],function(err,results){
@@ -36,9 +45,9 @@ function(commit,callback){
 			}else{
 				
 				var me = results[0];
-				var comments = results[1];
+				var commits = results[1];
 				
-				var isParticipating = _.find(comments,function(comment){
+				var didCommit = _.find(commits,function(comment){
 					return comment.user.login == me.login
 				})
 				
