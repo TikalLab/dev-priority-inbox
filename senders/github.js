@@ -27,31 +27,36 @@ console.log('received this message: %s',util.inspect(message))
 	
 		$ = cheerio.load(message);
 		var a = $('a:contains("view it on GitHub")');
-		var href = a.attr('href');
-		var parsed = url.parse(href);
-		var pathname = parsed.pathname;
-		var parts = pathname.split('/');
-		var repo = parts[1] + '/' + parts[2];
-		var id = parts[4];
-	
-console.log('parts are %s',util.inspect(parts))		
-		var rules;
-		switch(parts[3]){
-		case 'pull':
-			rules = pullRequestRules;
-			break;
-		case 'commit':
-			rules = commitRules;
-			break;
-		case 'issues':
-			rules = issueRules;
-			break;
-		}
-		
-		if(rules){
-			applyRules(rules,accessToken,message,repo,id,callback)
+		if(!a.attr('href')){
+			callback() // sanity
 		}else{
-			callback()
+			var href = a.attr('href');
+			var parsed = url.parse(href);
+			var pathname = parsed.pathname;
+			var parts = pathname.split('/');
+			var repo = parts[1] + '/' + parts[2];
+			var id = parts[4];
+		
+	console.log('parts are %s',util.inspect(parts))		
+			var rules;
+			switch(parts[3]){
+			case 'pull':
+				rules = pullRequestRules;
+				break;
+			case 'commit':
+				rules = commitRules;
+				break;
+			case 'issues':
+				rules = issueRules;
+				break;
+			}
+			
+			if(rules){
+				applyRules(rules,accessToken,message,repo,id,callback)
+			}else{
+				callback()
+			}
+			
 		}
 		
 	}	
