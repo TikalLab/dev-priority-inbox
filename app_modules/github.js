@@ -24,6 +24,18 @@ module.exports = {
 			}
 		}); 
 	},	
+	getCommit: function(accessToken,repo,sha,callback){
+		var headers = this.getAPIHeaders(accessToken);
+		request('https://api.github.com/repos/' + repo + '/commits/' + sha,{headers: headers},function(error,response,body){
+			if(error){
+				callback(error);
+			}else if(response.statusCode > 300){
+				callback(response.statusCode + ' : ' + body);
+			}else{
+				callback(null,JSON.parse(body));
+			}
+		}); 
+	},	
 	getRepo: function(accessToken,repo,callback){
 		var headers = this.getAPIHeaders(accessToken);
 		request('https://api.github.com/repos/' + repo,{headers: headers},function(error,response,body){

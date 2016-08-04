@@ -8,6 +8,8 @@ var prIsOnRepoICreated = require('../rules/github/pull-request/pr-is-on-repo-i-c
 
 var IParticiapteInDiscussion = require('../rules/github/issue/i-participate-in-discussion')
 
+var ICommittedThisFileOnce = require('../rules/github/commit/i-committed-this-file-once')
+
 var pullRequestRules = [
 	prIsOnRepoICreated                     	
 ]
