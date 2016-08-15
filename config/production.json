@@ -3,7 +3,7 @@
 		"client_id": "34526377599-p89l7fpnd6oo5u941dleg5bgbm52vsbt.apps.googleusercontent.com",
 		"client_secret": "",
 		"redirect_domain": "kaboom.herokuapp.com",
-		"topic": "projects/dpi-staging/topics/mytopic"
+		"topic": "projects/kaboom-140415/topics/mytopic"
 	},
 	"app": {
 		"name": "Kaboom",
