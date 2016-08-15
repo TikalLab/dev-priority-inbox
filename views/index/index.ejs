@@ -1,7 +1,24 @@
-<% if(!user){ %>
-<a href="/google/authorize">connect google</a>
-<% }else if(!('github' in user)){ %>
-<a href="/github/authorize">connect github</a>
-<% }else{ %>
-All done...
-<% } %>
+<div class="row">
+	<div class="col-md-6 col-md-offset-3">
+		
+		<% if(!user){ %>
+			<h1>DPI will tag important email notification from various dev tools you use.</h1>
+			<h3>To start, please connect your Google account.</h3>
+			<a href="/google/authorize" class="btn btn-block btn-lg btn-social btn-google">
+			    <span class="fa fa-google"></span> Sign in with Google
+			</a>
+		<% }else if(!('github' in user)){ %>
+			<h1>Connect your GitHub so DPI can dig into your GitHub data when you get a GitHub notification and determine its importance</h1>
+			<a href="/github/authorize" class="btn btn-block btn-lg btn-social btn-github">
+			    <span class="fa fa-github"></span> Connect GitHub
+			</a>
+		<% }else{ %>
+			<h1>You're all done here. Now pay attention to email tags...</h1>
+		<% } %>
+	</div>
+</div>
+
+
+
+
+

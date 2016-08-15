@@ -1,0 +1,18 @@
+{
+	"google": {
+		"client_id": "651980471382-2vj1199bfs1e9ven4rjl2839urt4dhvq.apps.googleusercontent.com",
+		"client_secret": "yTWEe3kFkfhly7nuMYi_lRC6",
+		"redirect_domain": "dpi-staging.herokuapp.com",
+		"topic": "projects/dpi-staging/topics/mytopic"
+	},
+	"app": {
+		"name": "dpi_staging",
+		"label_name": "DPI-staging Important", 
+		"domain": "dpi-staging.herokuapp.com"
+	},
+	"github": {
+		"client_id": "014c68188e70593ea213",
+		"client_secret": "3412eb52def533318a0ee1057f9c4f8912eff94c",
+		"redirect_domain": "dpi-staging.herokuapp.com"
+	}
+}

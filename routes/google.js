@@ -203,6 +203,8 @@ console.log('profile is %s',util.inspect(watch))
 
 router.post('/push',function(req,res,next){
 	
+	res.sendStatus(200)
+	
 	var data = JSON.parse(atob(req.body.message.data))
 	console.log('data is %s',util.inspect(data))
 
@@ -259,7 +261,7 @@ router.post('/push',function(req,res,next){
  					callback(response.statusCode + ' : ' + body);
  				}else{
  					var history = JSON.parse(body);
-console.log('history is %s',util.inspect(history))			
+console.log('history is %s',util.inspect(history,{depth:8}))			
  					callback(null,user,accessToken,history);
  				}
  			});			
@@ -301,13 +303,13 @@ console.log('history is %s',util.inspect(history))
 		},
 	],function(err){
 		if(err == 'user wasnt found'){
-			res.sendStatus(200) // quiet ggole
+//			res.sendStatus(200) // quiet ggole
 		}else if(err){
 			console.log('err is %s',err)
-			res.sendStatus(500)
+//			res.sendStatus(500)
 		}else{
 //			console.log('message is %s',util.inspect(history,{depth:8}));
-			res.sendStatus(200)
+//			res.sendStatus(200)
 		}
 	})
 	
