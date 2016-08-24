@@ -7,7 +7,7 @@
 	},
 	"app": {
 		"name": "dpi_dev",
-		"label_name": "DPI-dev Important", 
+		"label_name": "DPI-dev Important",
 		"email": "daily@snapgluedev.com",
 		"domain": "localhost:3000",
 		"unsubscribe_secret": "NineInchNails",
@@ -17,6 +17,10 @@
 		"view": {
 			"list_limit": 1
 		}
+	},
+	"auth": {
+		"username": "admin",
+		"password": "123456"
 	},
 	"github": {
 		"client_id": "cd3aaa6ba16424757916",

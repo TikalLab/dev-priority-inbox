@@ -7,8 +7,12 @@
 	},
 	"app": {
 		"name": "dpi_staging",
-		"label_name": "DPI-staging Important", 
+		"label_name": "DPI-staging Important",
 		"domain": "dpi-staging.herokuapp.com"
+	},
+	"auth": {
+		"username": "admin",
+		"password": "123456"
 	},
 	"github": {
 		"client_id": "014c68188e70593ea213",

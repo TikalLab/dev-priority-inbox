@@ -1,0 +1,34 @@
+<div class="page-header">
+	<div class="page-title">
+		&nbsp;
+	</div>
+</div>
+
+
+<div class="panel panel-default">
+	<div class="panel-heading"><h6 class="panel-title"><i class="icon-table"></i> Latest Users</h6></div>
+	<div class="datatable">
+
+		<table class="table">
+			<thead>
+				<th>user id</th>
+				<th>signed up at</th>
+				<th>name</th>
+				<th>email</th>
+			</thead>
+
+
+			<% users.forEach(function(user){ %>
+				<tr>
+					<td><%=user._id%></td>
+					<td><%=moment(user.created_at).calendar()%></td>
+					<td><%=user.google.display_name%></td>
+					<td><%=user.email%></td>
+				</tr>
+			<% }) %>
+		</table>
+
+
+
+	</div>
+</div>

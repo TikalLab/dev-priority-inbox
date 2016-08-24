@@ -7,8 +7,12 @@
 	},
 	"app": {
 		"name": "Kaboom",
-		"label_name": "Kaboom", 
+		"label_name": "Kaboom",
 		"domain": "kaboom.herokuapp.com"
+	},
+	"auth": {
+		"username": "admin",
+		"password": ""
 	},
 	"github": {
 		"client_id": "e43021fedf69fb0b0114",
