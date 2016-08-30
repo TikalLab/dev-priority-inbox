@@ -219,6 +219,8 @@ router.post('/push',function(req,res,next){
 		function(user,callback){
 			if(!user){
 				callback('user wasnt found')
+			}else if(!('github' in user)){
+				callback('user didnt connect github')
 			}else{
 				var form = {
 					client_id: config.get('google.client_id'),
@@ -304,6 +306,7 @@ console.log('history is %s',util.inspect(history,{depth:8}))
 	],function(err){
 		if(err == 'user wasnt found'){
 //			res.sendStatus(200) // quiet ggole
+		}else if(err == 'user didnt connect github'){
 		}else if(err){
 			console.log('err is %s',err)
 //			res.sendStatus(500)
