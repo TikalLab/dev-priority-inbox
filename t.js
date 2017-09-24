@@ -18,13 +18,14 @@ async.waterfall([
       client_id: '34526377599-p89l7fpnd6oo5u941dleg5bgbm52vsbt.apps.googleusercontent.com',
       client_secret: 'G6CjvFR5qWrMZmpmlgLPMfnj',
       grant_type: 'refresh_token',
-      refresh_token: '1/LZ8IUbuXS80jn1pHYM--MxtJcX0X-_qX8o1NU6OqusM',
+      // refresh_token: '1/LZ8IUbuXS80jn1pHYM--MxtJcX0X-_qX8o1NU6OqusM', // me
+      refresh_token: '1/5RcfxRKxeabfvoJ1oqSaO4Vu5ovkwncep0MzcXagw-U' // lior
     };
     request.post('https://www.googleapis.com/oauth2/v4/token',{form: form, json: true},function(error,response,body){
       if(error){
         callback(error)
       }else if(response.statusCode != 200){
-        callback(response.statusCode + ' : ' + body);
+        callback(response.statusCode + ' : ' + util.inspect(body));
       }else{
         console.log('access toekn is %s',body.access_token)
         callback(null,body.access_token)
@@ -52,9 +53,9 @@ async.waterfall([
     //   }
     //
     // })
-    searchMessages(accessToken,'scala',function(err,messages){
-      console.log('messages count: %s',messages.length)
-      console.log('messages are: %s',util.inspect(messages))
+    searchMessages(accessToken,'ansible',function(err,messages){
+      // console.log('messages count: %s',messages.length)
+      // console.log('messages are: %s',util.inspect(messages))
       callback(err,accessToken,messages)
     })
   },
@@ -68,7 +69,8 @@ async.waterfall([
       var qs = {
         // format: 'RAW'
       }
-      request('https://www.googleapis.com/gmail/v1/users/me/messages/' + message.id,{headers: headers, qs: qs ,json: true},function(error,response,body){
+      // request('https://www.googleapis.com/gmail/v1/users/me/messages/' + message.id,{headers: headers, qs: qs ,json: true},function(error,response,body){
+      request('https://www.googleapis.com/gmail/v1/users/all@tikalk.com/messages/' + message.id,{headers: headers, qs: qs ,json: true},function(error,response,body){
         if(error){
           callback(error);
         }else if(response.statusCode > 300){
@@ -132,7 +134,8 @@ function searchMessages(accessToken,q,callback){
       if(nextPageToken){
         qs.pageToken = nextPageToken
       }
-      request('https://www.googleapis.com/gmail/v1/users/me/messages',{headers: headers, qs: qs, json: true},function(error,response,body){
+      // request('https://www.googleapis.com/gmail/v1/users/me/messages',{headers: headers, qs: qs, json: true},function(error,response,body){
+      request('https://www.googleapis.com/gmail/v1/users/all@tikalk.com/messages',{headers: headers, qs: qs, json: true},function(error,response,body){
         if(error){
           callback(error)
         }else if(response.statusCode != 200){
